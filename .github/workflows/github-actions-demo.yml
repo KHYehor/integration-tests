@@ -1,0 +1,110 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [production]
+  pull_request:
+    branches: [ production ]
+
+jobs:
+  install-and-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+
+      - name: Install modules
+        run: npm install
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Build nest
+        run: npm run build
+
+      - uses: actions/cache@v3
+        with:
+          path: ./dist
+          key: npm-dist-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-dist-${{ runner.os }}-
+
+      - name: Show files
+        run: ls
+
+  lint-check:
+    runs-on: ubuntu-latest
+    needs: install-and-cache
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Show files
+        run: ls
+
+      - name: ESLint Check
+        run: npm run lint:check
+
+  test-docker-compose:
+    runs-on: ubuntu-latest
+    needs: install-and-cache
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v3
+        with:
+          path: ./dist
+          key: npm-dist-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-dist-${{ runner.os }}-
+
+      - name: Run Tests
+        run: npm run test:integration
+
+  test-testcontainers:
+    runs-on: ubuntu-latest
+    needs: install-and-cache
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v3
+        with:
+          path: ./dist
+          key: npm-dist-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-dist-${{ runner.os }}-
+
+      - name: Run Tests
+        run: npm run test:integration:testcontainers
+

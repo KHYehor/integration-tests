@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  redis:
+    image: "redis:7.2.3-alpine3.19"
+    container_name: "redis_container"
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - network
+
+  rabbitmq:
+    image: "rabbitmq:management-alpine"
+    container_name: "rabbitmq_container"
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - network
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  postgres:
+    image: "postgres:alpine3.19"
+    container_name: "postgres_container"
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - network
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=database
+
+  mockserver:
+    image: "mockserver/mockserver:5.15.0"
+    container_name: "mockserver_container"
+    restart: always
+    ports:
+      - "1080:1080"
+    networks:
+      - network
+
+  node:
+    image: node/service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: "node_container"
+    restart: on-failure
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
