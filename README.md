@@ -9,23 +9,7 @@
 - [License](#license)
 
 ## Description
-Typically, when it comes to setting up integration tests and working with external dependencies, an approach is used where components are simulated through mocks. This means that database responses or requests via `axios` are artificially replaced with pre-defined results directly in the code. However, this repository demonstrates an alternative approach, where the tests interact with real external services, allowing for more accurate and comprehensive end-to-end validation of the application's functionality.
-```typescript
-const moduleRef: TestingModule = await Test.createTestingModule({
-  controllers: [UserController],
-  providers: [UserService],
-})
-  .overrideProvider(UserService)
-  .useFactory({
-    factory: () => ({
-      getUserById: jest.fn((id: string) => `Global Mocked User #${id}`),
-    }),
-  })
-  .compile();
-
-  userController = moduleRef.get<UserController>(UserController);
-```
-Rather than simulating components in code by mocking responses from the database or axios, this approach focuses on testing real interactions with external services. This ensures more accurate, end-to-end validation of your application's behavior. If you want to test how your app interacts with external client or provider APIs without mocking tools like axios, consider the following example:
+Typically, when it comes to setting up integration tests and working with external dependencies, an approach is used where components are simulated through mocks. This means that database responses or requests via `axios` are artificially replaced with pre-defined results directly in the code. Below you can see one of the example using such technique.
 ```typescript
 import axios from 'axios';
 // Set up an interceptor to mock requests
@@ -42,7 +26,8 @@ axios.get('https://api.example.com')
   .then(response => console.log(response.data))  // Logs 'mocked success'
   .catch(error => console.error(error));
 ```
-The solution for more realistic testing is using [mockserver](https://www.mock-server.com). This approach allows you to define expected request-response schemas, ensuring that your app reacts correctly to all possible scenarios from the provider API. For example, you can specify:
+
+If you want to test how your app interacts with external client or provider APIs without mocking tools like axios, consider the following solution called [mockserver](https://www.mock-server.com). This approach allows you to define expected request-response schemas, ensuring that your app reacts correctly to all possible scenarios from the provider API. For example, you can specify:
 ```json
 {
   "httpRequest": {
@@ -59,9 +44,6 @@ The schema can be more detailed based on your needs. Mocking the database or han
 - **No Code Mocking: Focuses on testing real integrations, without relying on mocks or stubs in node.js.**
 - **Production-like Testing: Verifies how the app interacts with external services in a more realistic, production-like environment.**
 - **Supports External APIs: Tests real API interactions with services like databases or third-party providers using MockServer to define request-response pairs without hardcoding behavior.**
-## Test case
-
-- describe briefly
 ## Installation
 
 ### Prerequisites
